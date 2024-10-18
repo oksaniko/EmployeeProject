@@ -2,7 +2,7 @@ package ru.rdsystems.demo.services.implementation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.rdsystems.demo.model.KafkaErrorMessageEntity;
+import ru.rdsystems.demo.model.entities.KafkaErrorMessageEntity;
 import ru.rdsystems.demo.repositories.KafkaErrorMessageRepository;
 import ru.rdsystems.demo.services.KafkaErrorMessageService;
 

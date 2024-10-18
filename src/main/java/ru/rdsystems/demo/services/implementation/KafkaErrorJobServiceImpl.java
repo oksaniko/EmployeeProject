@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.rdsystems.demo.kafka.KafkaProducer;
-import ru.rdsystems.demo.model.KafkaErrorMessageEntity;
+import ru.rdsystems.demo.model.entities.KafkaErrorMessageEntity;
 import ru.rdsystems.demo.repositories.KafkaErrorMessageRepository;
 import ru.rdsystems.demo.services.KafkaErrorJobService;
 import ru.rdsystems.demo.services.KafkaErrorMessageService;

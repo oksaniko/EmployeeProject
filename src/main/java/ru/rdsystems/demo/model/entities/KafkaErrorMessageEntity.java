@@ -1,4 +1,4 @@
-package ru.rdsystems.demo.model;
+package ru.rdsystems.demo.model.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

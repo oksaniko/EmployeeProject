@@ -1,9 +1,11 @@
-package ru.rdsystems.demo.model;
+package ru.rdsystems.demo.model.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import ru.rdsystems.demo.model.enums.Position;
+import ru.rdsystems.demo.model.enums.Status;
 
 @Entity
 @Getter
@@ -23,22 +25,14 @@ public class EmployeeEntity {
 
 	@Column(length = 20, nullable = false)
 	@Enumerated(EnumType.STRING)
-	private EmployeePosition position;
+	private Position position;
 
 	@Column(length = 20, nullable = false)
 	@Enumerated(EnumType.STRING)
-	private EmployeeStatus status;
+	private Status status;
 
 	@JdbcTypeCode(SqlTypes.JSON)
 	@Column(name = "random_data", columnDefinition = "jsonb")
 	private String randomData;
-
-	public enum EmployeePosition{
-		MANAGER, EMPLOYEE, UNDEFINED, TECH
-	}
-
-	public enum EmployeeStatus {
-		WORKING, TRIAL, TIME_OFF, DISMISSED, DELETED
-	}
 
 }

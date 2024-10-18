@@ -1,6 +1,6 @@
 package ru.rdsystems.demo.services;
 
-import ru.rdsystems.demo.model.KafkaErrorMessageEntity;
+import ru.rdsystems.demo.model.entities.KafkaErrorMessageEntity;
 
 public interface KafkaErrorMessageService {
 

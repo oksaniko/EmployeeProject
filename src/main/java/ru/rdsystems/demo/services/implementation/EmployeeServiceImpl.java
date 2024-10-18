@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.rdsystems.demo.kafka.KafkaProducer;
-import ru.rdsystems.demo.model.EmployeeEntity;
+import ru.rdsystems.demo.model.entities.EmployeeEntity;
+import ru.rdsystems.demo.model.enums.Status;
 import ru.rdsystems.demo.repositories.EmployeeRepository;
 import ru.rdsystems.demo.services.EmployeeService;
 
@@ -63,7 +64,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 			employee = new EmployeeEntity(
 					UUID.randomUUID().toString().replace("-","").toLowerCase(Locale.ROOT),
 					employeeRequest.getName(), employeeRequest.getPosition(),
-					EmployeeEntity.EmployeeStatus.WORKING, null
+					Status.WORKING, null
 			);
 		}
 		repository.save(employee);
