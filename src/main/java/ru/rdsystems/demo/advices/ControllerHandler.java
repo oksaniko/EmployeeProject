@@ -1,4 +1,4 @@
-package ru.rdsystems.demo.handlers;
+package ru.rdsystems.demo.advices;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice(assignableTypes = EmployeeController.class)
-public class EmployeeControllerHandler {
+public class ControllerHandler {
 
 	@ExceptionHandler(EntityNotFoundException.class)
 	public ResponseEntity<Map<String, Object>> handleNotFoundException(Throwable ex){
