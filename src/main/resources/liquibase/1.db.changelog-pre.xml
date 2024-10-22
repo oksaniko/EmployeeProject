@@ -14,5 +14,10 @@
 		<sqlFile relativeToChangelogFile="true" encoding="utf8"
 			path="changelog/1_pre-script/1002_create_kafka_errors.sql"/>
 	</changeSet>
+	
+	<changeSet id="1003_add_jsonb_field" author="o.silkacheva" runAlways="false">
+		<sqlFile relativeToChangelogFile="true" encoding="utf8"
+			path="changelog/1_pre-script/1003_add_jsonb_field.sql"/>
+	</changeSet>
 
 </databaseChangeLog>

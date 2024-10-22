@@ -63,7 +63,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 			employee = new EmployeeEntity(
 					UUID.randomUUID().toString().replace("-","").toLowerCase(Locale.ROOT),
 					employeeRequest.getName(), employeeRequest.getPosition(),
-					EmployeeEntity.EmployeeStatus.WORKING
+					EmployeeEntity.EmployeeStatus.WORKING, null
 			);
 		}
 		repository.save(employee);

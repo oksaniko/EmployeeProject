@@ -1,0 +1,1 @@
+alter table employees add random_data jsonb default null;

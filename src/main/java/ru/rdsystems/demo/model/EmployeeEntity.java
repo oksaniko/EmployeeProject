@@ -2,6 +2,8 @@ package ru.rdsystems.demo.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Getter
@@ -26,6 +28,10 @@ public class EmployeeEntity {
 	@Column(length = 20, nullable = false)
 	@Enumerated(EnumType.STRING)
 	private EmployeeStatus status;
+
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(name = "random_data", columnDefinition = "jsonb")
+	private String randomData;
 
 	public enum EmployeePosition{
 		MANAGER, EMPLOYEE, UNDEFINED, TECH
