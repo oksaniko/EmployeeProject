@@ -2,6 +2,7 @@ package ru.rdsystems.demo.services.implementation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +31,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 	private final EmployeeRepository repository;
 	private final KafkaProducer kafkaProducer;
 	private final RandomUserClient remoteClient;
+	private final MeterRegistry meterRegistry;
 
 	@Value("${kafka.topic.employeeData}")
 	private String kafkaTopic;
+	@Value("${metrics.employees_count.name}")
+	private String metricEmployeesCount;
 
 	@Override
 	public EmployeeEntity getById(String id){
@@ -53,6 +57,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	}
 
 	private EmployeeEntity createEmployeeByRequest(EmployeeEntity employeeRequest){
+		meterRegistry.counter(metricEmployeesCount).increment();
 		return new EmployeeEntity(
 				UUID.randomUUID().toString().replace("-","").toLowerCase(Locale.ROOT),
 				employeeRequest.getName(), employeeRequest.getPosition(),
@@ -96,12 +101,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 	@Transactional
 	public Map<String, Object> generateRandom(EmployeeEntity employeeRequest) {
 		Map<String, Object> resultMap = new HashMap<>();
-		if (employeeRequest.getRandomData().isEmpty()){
+		if (employeeRequest.getRandomData() == null){
 			ResponseEntity<Map<String, Object>> randomResponse = remoteClient.getRandomInfo();
 			if(randomResponse.getStatusCode().is2xxSuccessful()){
 				resultMap = randomResponse.getBody();
 				log.info(resultMap.toString());
 				employeeRequest.setRandomData(new JSONObject(resultMap).toString());
+				sendToKafka(employeeRequest);
 			}
 		} else
 			resultMap = Map.of("randomData",employeeRequest.getRandomData());
