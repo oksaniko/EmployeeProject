@@ -2,7 +2,6 @@ package ru.rdsystems.demo.services.implementation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +16,7 @@ import ru.rdsystems.demo.model.enums.Status;
 import ru.rdsystems.demo.remote.RandomUserClient;
 import ru.rdsystems.demo.repositories.EmployeeRepository;
 import ru.rdsystems.demo.services.EmployeeService;
+import ru.rdsystems.demo.services.MetricService;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -31,7 +31,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	private final EmployeeRepository repository;
 	private final KafkaProducer kafkaProducer;
 	private final RandomUserClient remoteClient;
-	private final MeterRegistry meterRegistry;
+	private final MetricService metricService;
 
 	@Value("${kafka.topic.employeeData}")
 	private String kafkaTopic;
@@ -57,7 +57,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	}
 
 	private EmployeeEntity createEmployeeByRequest(EmployeeEntity employeeRequest){
-		meterRegistry.counter(metricEmployeesCount).increment();
+		metricService.increment(metricEmployeesCount);
 		return new EmployeeEntity(
 				UUID.randomUUID().toString().replace("-","").toLowerCase(Locale.ROOT),
 				employeeRequest.getName(), employeeRequest.getPosition(),

@@ -1,6 +1,5 @@
 package ru.rdsystems.demo.kafka;
 
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +8,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ru.rdsystems.demo.model.entities.KafkaErrorMessageEntity;
 import ru.rdsystems.demo.services.KafkaErrorMessageService;
+import ru.rdsystems.demo.services.MetricService;
 
 @Service
 @RequiredArgsConstructor
@@ -16,7 +16,7 @@ import ru.rdsystems.demo.services.KafkaErrorMessageService;
 public class KafkaProducer {
 
 	private final KafkaErrorMessageService service;
-	private final MeterRegistry meterRegistry;
+	private final MetricService metricService;
 
 	@Value("${kafka.metrics.sended_messages_count.name}")
 	private String metricSendedMessagesCount;
@@ -29,7 +29,7 @@ public class KafkaProducer {
 		try {
 			log.info("Sending message='{}' to topic='{}'", message, topic);
 			kafkaTemplate.send(topic, message);
-			meterRegistry.counter(metricSendedMessagesCount).increment();
+			metricService.increment(metricSendedMessagesCount);
 			result = true;
 		} catch (Exception e){
 			log.error(e.getMessage());
