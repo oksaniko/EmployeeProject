@@ -2,6 +2,7 @@ package ru.rdsystems.demo.services.implementation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	private final KafkaProducer kafkaProducer;
 	private final RandomUserClient remoteClient;
 	private final MetricService metricService;
+	private final Counter counter;
 
 	@Value("${kafka.topic.employeeData}")
 	private String kafkaTopic;
@@ -102,6 +104,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public Map<String, Object> generateRandom(EmployeeEntity employeeRequest) {
 		Map<String, Object> resultMap = new HashMap<>();
 		if (employeeRequest.getRandomData() == null){
+			metricService.increment(counter);
 			ResponseEntity<Map<String, Object>> randomResponse = remoteClient.getRandomInfo();
 			if(randomResponse.getStatusCode().is2xxSuccessful()){
 				resultMap = randomResponse.getBody();
