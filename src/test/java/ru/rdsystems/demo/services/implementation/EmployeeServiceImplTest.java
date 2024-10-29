@@ -2,15 +2,16 @@ package ru.rdsystems.demo.services.implementation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
 import lombok.extern.slf4j.Slf4j;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.rdsystems.demo.kafka.KafkaProducer;
 import ru.rdsystems.demo.model.entities.EmployeeEntity;
 import ru.rdsystems.demo.remote.RandomUserClient;
 import ru.rdsystems.demo.repositories.EmployeeRepository;
 import ru.rdsystems.demo.services.EmployeeService;
+import ru.rdsystems.demo.services.KafkaMessageService;
 import ru.rdsystems.demo.services.MetricService;
 
 import java.util.Optional;
@@ -24,17 +25,19 @@ class EmployeeServiceImplTest {
 
 	private EmployeeService employeeService;
 	private EmployeeRepository repository;
-	private KafkaProducer producer;
 	private RandomUserClient remoteClient;
 	private MetricService metricService;
+	private Counter counter;
+	private KafkaMessageService kafkaService;
 
 	@BeforeEach
 	void setUp() {
 		repository = mock(EmployeeRepository.class);
-		producer = mock(KafkaProducer.class);
 		metricService = mock(MetricService.class);
+		kafkaService = mock(KafkaMessageService.class);
+		counter = mock(Counter.class);
 
-		employeeService = new EmployeeServiceImpl(repository, producer, remoteClient, metricService);
+		employeeService = new EmployeeServiceImpl(repository, remoteClient, metricService, counter, kafkaService);
 	}
 
 	@Test

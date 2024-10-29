@@ -1,7 +1,5 @@
 package ru.rdsystems.demo.services.implementation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Counter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +9,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.rdsystems.demo.kafka.KafkaProducer;
 import ru.rdsystems.demo.model.entities.EmployeeEntity;
 import ru.rdsystems.demo.model.enums.Status;
 import ru.rdsystems.demo.remote.RandomUserClient;
 import ru.rdsystems.demo.repositories.EmployeeRepository;
 import ru.rdsystems.demo.services.EmployeeService;
+import ru.rdsystems.demo.services.KafkaMessageService;
 import ru.rdsystems.demo.services.MetricService;
 
 import java.util.HashMap;
@@ -30,13 +28,11 @@ import java.util.UUID;
 public class EmployeeServiceImpl implements EmployeeService {
 
 	private final EmployeeRepository repository;
-	private final KafkaProducer kafkaProducer;
 	private final RandomUserClient remoteClient;
 	private final MetricService metricService;
 	private final Counter counter;
+	private final KafkaMessageService kafkaService;
 
-	@Value("${kafka.topic.employeeData}")
-	private String kafkaTopic;
 	@Value("${metrics.employees_count.name}")
 	private String metricEmployeesCount;
 
@@ -44,18 +40,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public EmployeeEntity getById(String id){
 		return repository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Сотрудник (id = " + id + ") не найден"));
-	}
-
-	private void sendToKafka(EmployeeEntity employee){
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			String message = objectMapper.writeValueAsString(employee);
-			log.info("Message to kafka {}", message);
-			kafkaProducer.sendMessage(kafkaTopic, message);
-		} catch (JsonProcessingException e) {
-			log.error("Ошибка упаковки в json: {}", e.getMessage());
-			throw new RuntimeException(e);
-		}
 	}
 
 	private EmployeeEntity createEmployeeByRequest(EmployeeEntity employeeRequest){
@@ -75,11 +59,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 				employeeDB.setPosition(employeeRequest.getPosition());
 			if(employeeRequest.getStatus() != null)
 				employeeDB.setStatus(employeeRequest.getStatus());
-			sendToKafka(employeeDB);
+			kafkaService.sendMessage(employeeDB);
 		} else {
 			if(employeeRequest.getStatus() != null && employeeRequest.getStatus().equals(Status.DELETED)){
 				employeeDB.setStatus(employeeRequest.getStatus());
-				sendToKafka(employeeDB);
+				kafkaService.sendMessage(employeeDB);
 			}
 		}
 		return employeeDB;
@@ -94,7 +78,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		} catch (EntityNotFoundException notFoundException){
 			employee = createEmployeeByRequest(employeeRequest);
 			repository.save(employee);
-			sendToKafka(employee);
+			kafkaService.sendMessage(employee);
 		}
 		return employee;
 	}
@@ -110,7 +94,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 				resultMap = randomResponse.getBody();
 				log.info(resultMap.toString());
 				employeeRequest.setRandomData(new JSONObject(resultMap).toString());
-				sendToKafka(employeeRequest);
+				kafkaService.sendMessage(employeeRequest);
 			}
 		} else
 			resultMap = Map.of("randomData",employeeRequest.getRandomData());

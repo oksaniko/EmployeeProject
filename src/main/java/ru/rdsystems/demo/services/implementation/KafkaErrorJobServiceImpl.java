@@ -8,7 +8,7 @@ import ru.rdsystems.demo.kafka.KafkaProducer;
 import ru.rdsystems.demo.model.entities.KafkaErrorMessageEntity;
 import ru.rdsystems.demo.repositories.KafkaErrorMessageRepository;
 import ru.rdsystems.demo.services.KafkaErrorJobService;
-import ru.rdsystems.demo.services.KafkaErrorMessageService;
+import ru.rdsystems.demo.services.KafkaMessageService;
 
 import java.util.List;
 
@@ -18,8 +18,7 @@ import java.util.List;
 public class KafkaErrorJobServiceImpl implements KafkaErrorJobService {
 
 	private final KafkaErrorMessageRepository repository;
-	private final KafkaErrorMessageService service;
-	private final KafkaProducer producer;
+	private final KafkaMessageService service;
 
 	@Override
 	@Scheduled(cron = "${cron.kafka.error}")
@@ -29,10 +28,9 @@ public class KafkaErrorJobServiceImpl implements KafkaErrorJobService {
 			log.info("No message for repeat sending");
 		else
 			for(KafkaErrorMessageEntity message : errorList) {
-				if(producer.sendMessage(message.getTopicName(), message.getMessage())){
-					service.deleteById(message.getId());
-					log.info("Message '{}' send", message);
-				}
+				service.sendMessage(message.getTopicName(), message.getMessage());
+				service.deleteById(message.getId());
+				log.info("Message '{}' send", message);
 			}
 	}
 
